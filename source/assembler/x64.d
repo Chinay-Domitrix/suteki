@@ -6,7 +6,7 @@ struct X64Register
     uint size;
 }
 
-const X64Register x64_rax = { 0, 8 };
+const X64Register g_rax = { 0, 8 };
 
 struct X64Assembler
 {
