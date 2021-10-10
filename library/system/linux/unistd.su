@@ -1,0 +1,3 @@
+export system.linux.unistd;
+
+extern declare write(fd: int, buffer: *byte, count: ulong): long;

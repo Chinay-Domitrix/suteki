@@ -1,0 +1,21 @@
+export suteki.io;
+
+version (linux)
+{
+    import system.linux.unistd;
+
+    define console_write(message: string)
+    {
+        write(1, message.ptr, message.length);
+    }
+
+    define console_writeln(message: string)
+    {
+        console_write(message);
+        console_write("\n");
+    }
+}
+else
+{
+    
+}
