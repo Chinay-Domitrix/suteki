@@ -1,0 +1,3 @@
+export sus;
+
+import test.b;

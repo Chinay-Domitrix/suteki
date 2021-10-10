@@ -1,4 +1,5 @@
-import suteki.io;
+export test.a;
+import test.b;
 
 define main()
 {
