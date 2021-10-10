@@ -1,0 +1,1 @@
+gdc source/*/*.d -Isource -o out/suteki -O3 
