@@ -157,9 +157,11 @@ struct Scanner
         while (is_identifier(*end) || is_number(*end))
             advance();
 
+        uint length = cast(uint)(end - start);
+
         foreach (key, value; keywords)
         {
-            if (string_equals(key.ptr, start, cast(uint)(end - start)))
+            if (key.length == length && string_equals(key.ptr, start, length))
                 return make_token(value);
         }
 
