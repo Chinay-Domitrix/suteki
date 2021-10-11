@@ -16,21 +16,16 @@ struct Typer
     private void error(string message)
     {
         had_error = true;
-        printf("%sError:%s %s\n%s", c_red, c_white, message.ptr, c_reset);
+        printf("%sTyper Error:%s %s\n%s", c_red, c_white, message.ptr, c_reset);
     }
 
     // Error at token
     private void error(const(Token) token, string message)
     {
         had_error = true;
-        printf("%s[%d:%d] Error", c_red, token.line, token.column);
+        printf("%s[%d:%d] Typer Error", c_red, token.line, token.column);
 
-        if (token.type == token_error)
-        {
-            printf(":%s ", c_white);
-            printf("%s\n", token.start);
-        }
-        else if (token.type == token_end)
+        if (token.type == token_end)
         {
             printf(" at end:%s ", c_white);
             printf("%s\n", message.ptr);
@@ -48,7 +43,9 @@ struct Typer
     bool start()
     {
         had_error = false;
-        parser.start();
+        
+        if (!parser.start())
+            had_error = true;
 
         return !had_error;
     }

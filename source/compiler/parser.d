@@ -46,14 +46,14 @@ struct Parser
     private void error(string message)
     {
         had_error = true;
-        printf("%sError:%s %s\n%s", c_red, c_white, message.ptr, c_reset);
+        printf("%sParser Error:%s %s\n%s", c_red, c_white, message.ptr, c_reset);
     }
 
     // Error at token
     private void error(const(Token) token, string message)
     {
         had_error = true;
-        printf("%s[%d:%d] Error", c_red, token.line, token.column);
+        printf("%s[%d:%d] Parser Error", c_red, token.line, token.column);
 
         if (token.type == token_error)
         {
