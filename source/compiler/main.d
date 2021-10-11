@@ -1,13 +1,17 @@
 module compiler.main;
 
 import std.stdio;
-import compiler.scanner;
+import std.file;
+
+import compiler.typer;
+import compiler.config;
 
 void main(string[] args)
 {
-    Scanner scanner;
-    scanner.set("deefine main() {}");
-    scanner.next();
+    // Read all input files
+    for (uint i = 1; i < args.length; ++i)
+        g_inputs ~= readText(args[i]);
 
-    printf("%.*s %d\n", scanner.current.length, scanner.current.start, scanner.current.type);
+    Typer typer;
+    typer.start();   
 }

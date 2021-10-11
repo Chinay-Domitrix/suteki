@@ -1,7 +1,7 @@
 export test.a;
-import test.b;
+import sus;
 
 define main()
 {
-    
+    return;
 }

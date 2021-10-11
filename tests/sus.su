@@ -1,0 +1,8 @@
+export sus;
+
+import test.b;
+
+define SuSpecT()
+{
+    
+}
