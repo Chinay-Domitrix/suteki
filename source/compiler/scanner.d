@@ -30,7 +30,7 @@ private enum uint[string] keywords =
     "declare": token_declare,
     "define":  token_define,
     "return":  token_return,
-    "export":  token_export,
+    "module":  token_module,
     "import":  token_import,
 ];
 

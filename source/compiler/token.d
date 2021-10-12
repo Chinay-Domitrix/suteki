@@ -43,7 +43,7 @@ enum
     token_declare,
     token_define,
     token_return,
-    token_export,
+    token_module,
     token_import,
 }
 

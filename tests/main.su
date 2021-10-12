@@ -1,4 +1,4 @@
-export test.a;
+module test.a;
 import sus;
 
 define main()

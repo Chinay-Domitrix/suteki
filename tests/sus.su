@@ -1,4 +1,4 @@
-export sus;
+module sus;
 
 import test.b;
 

@@ -1,4 +1,4 @@
-export test.b;
+module test.b;
 
 define hello()
 {

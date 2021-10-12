@@ -14,7 +14,7 @@ enum
     symbol_flag_none,
 }
 
-struct Export
+struct Module
 {
     Symbol[string] symbols;
     string         source;
@@ -30,9 +30,9 @@ struct Parser
     private Scanner scanner;
             bool    had_error;
 
-    private string export_name;
+    private string module_name;
 
-    Export[string] exports;
+    Module[string] modules;
     Symbol[string] symbols;
 
     string main_file;
@@ -118,40 +118,40 @@ struct Parser
         return NodePtr(cast(uint)(ast.length) - 1);
     }
 
-    // Learn export
-    private void learn_export()
+    // Learn module
+    private void learn_module()
     {
-        export_name = "";
+        module_name = "";
 
         for (;;)
         {
-            consume(token_identifier, "Invalid export name.");
+            consume(token_identifier, "Invalid module name.");
 
             for (uint i = 0; i < scanner.previous.length; ++i)
-                export_name ~= scanner.previous.start[i];
+                module_name ~= scanner.previous.start[i];
 
             if (!match(token_dot))
                 break;
 
-            export_name ~= '.';
+            module_name ~= '.';
         }
 
-        consume(token_semicolon, "Expected ';' after export name.");
+        consume(token_semicolon, "Expected ';' after module name.");
 
-        // Add export
-        if (export_name != "")
+        // Add module
+        if (module_name != "")
         {
-            Export ex;
-            ex.source = current_source;
+            Module mod;
+            mod.source = current_source;
 
-            exports[export_name] = ex;
+            modules[module_name] = mod;
         }
     }
 
     // Learn pass
     private void learn()
     {
-        bool have_export = false;
+        bool have_module = false;
 
         main_file = "";
 
@@ -159,7 +159,7 @@ struct Parser
         {
             current_source = source;
 
-            // First pass - Find export and maybe entry point function
+            // First pass - Find module name and maybe entry point function
             scanner.set(source);
             scanner.next();
 
@@ -169,10 +169,10 @@ struct Parser
 
                 switch (scanner.previous.type)
                 {
-                    case token_export:
+                    case token_module:
                     {
-                        learn_export();
-                        have_export = true;
+                        learn_module();
+                        have_module = true;
                         break;
                     }
 
@@ -181,8 +181,8 @@ struct Parser
                 }
             }
 
-            // File isn't exported?
-            if (!have_export)
+            // No module?
+            if (!have_module)
                 break;
 
             // Second pass - Learn every global
@@ -208,7 +208,7 @@ struct Parser
                         if (name == "main")
                             main_file = source;
 
-                        exports[export_name].symbols[name] = Symbol();
+                        modules[module_name].symbols[name] = Symbol();
                         break;
                     }
 
@@ -225,7 +225,7 @@ struct Parser
             return;
         }
 
-        export_name = "";
+        module_name = "";
     }
 
     // Parse import
@@ -235,7 +235,7 @@ struct Parser
 
         for (;;)
         {
-            consume(token_identifier, "Invalid import name.");
+            consume(token_identifier, "Invalid module name.");
 
             for (uint i = 0; i < scanner.previous.length; ++i)
                 import_name ~= scanner.previous.start[i];
@@ -246,29 +246,29 @@ struct Parser
             import_name ~= '.';
         }
 
-        consume(token_semicolon, "Expected ';' after import name.");
+        consume(token_semicolon, "Expected ';' after module name.");
         
-        if (!(import_name in exports))
+        if (!(import_name in modules))
         {
             scanner.previous.start  = import_name.ptr;
             scanner.previous.length = cast(uint)(import_name.length);
 
-            error(scanner.previous, "Could not find import name.");
+            error(scanner.previous, "Could not find module.");
             return;
         }
 
         // Import
         if (import_name != "")
         {
-            Export *ex = &exports[import_name];
+            Module *mod = &modules[import_name];
 
             // Add file symbols to global symbol table
-            foreach(key, value; ex.symbols)
+            foreach(key, value; mod.symbols)
                 symbols[key] = value;
 
             // Include file code
             Scanner old_scanner = scanner;
-            scanner.set(ex.source);
+            scanner.set(mod.source);
             scanner.next();
 
             while (!match(token_end))
@@ -406,7 +406,7 @@ struct Parser
                 break;
             }
 
-            case token_export:
+            case token_module:
             {
                 // Skip everything
                 for (;;)
