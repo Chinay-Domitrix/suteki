@@ -1,6 +1,6 @@
 module test.a;
 
-define main(): string
+define main()
 {
-    return "Hello";
+    return;
 }

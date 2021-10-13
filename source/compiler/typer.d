@@ -4,6 +4,7 @@ import compiler.parser;
 import compiler.ast;
 import compiler.token;
 import utilities.color;
+import utilities.string;
 
 import std.stdio;
 
@@ -236,6 +237,23 @@ struct Typer
                 case node_function_declaration:
                 {
                     function_id = cast(int)(i);
+
+                    // Main function?
+                    NodeFunctionDeclaration *function_node = cast(NodeFunctionDeclaration *)(node);
+
+                    if (string_equals(function_node.name.start, "main", function_node.name.length))
+                    {
+                        // Make sure main function type is void or int
+                        int type;
+                        
+                        if (function_node.type != -1)
+                            type = get_node_type(cast(NodeType *)(parser.ast[function_node.type]));
+                        else
+                            type = type_void;
+
+                        if (type != type_void && type != type_int)
+                            error(function_node.name, "Entry point function 'main' can only have 'int' or 'void' return type.");
+                    }
                     break;
                 }
 
