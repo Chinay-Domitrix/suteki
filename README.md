@@ -1,2 +1,2 @@
 # suteki
-suteki (素敵) is simple programming language like C.
+suteki (素敵) a is simple programming language like C.
