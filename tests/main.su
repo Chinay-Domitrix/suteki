@@ -1,11 +1,6 @@
 module test.a;
 
-define main(): double
+define main(): string
 {
-    return 3;
-}
-
-define main(): single
-{
-    return 3.5;
+    return "Hello";
 }
