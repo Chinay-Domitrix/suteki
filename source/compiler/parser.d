@@ -6,6 +6,7 @@ import compiler.token;
 import compiler.ast;
 import utilities.color;
 import utilities.string;
+import utilities.list;
 
 import std.stdio;
 import std.conv;
@@ -39,7 +40,7 @@ struct Parser
     string main_file;
     string current_source;
 
-    Node[] ast;
+    List!(Node) ast;
 
     // Error 
     private void error(string message)
@@ -107,32 +108,34 @@ struct Parser
     }
 
     // Make AST node
-    private Node *make_node(uint type, int *id = null)
+    private Node *make_node(uint type, int *_id = null)
     {
+        int  id;
         Node node;
+
         node.type = type;
+        id        = cast(int)(ast.add(node));
 
-        ast ~= node;
+        if (_id != null)
+            *_id = id;
 
-        if (id != null)
-            *id = (cast(uint)(ast.length) - 1);
-
-        return &ast[cast(uint)(ast.length) - 1];
+        return &ast[id];
     }
 
     // Make AST expression node
-    private Node *make_expression_node(uint type, int *id = null)
+    private Node *make_expression_node(uint type, int *_id = null)
     {
+        int  id;
         Node node;
+
         node.type               = node_expression;
         node.as_expression.type = type;
+        id                      = cast(int)(ast.add(node));
 
-        ast ~= node;
+        if (_id != null)
+            *_id = id;
 
-        if (id != null)
-            *id = (cast(uint)(ast.length) - 1);
-
-        return &ast[cast(uint)(ast.length) - 1];
+        return &ast[id];
     }
 
     // Learn module
@@ -391,7 +394,7 @@ struct Parser
         if (scanner.previous.type == token_end)
             error(scanner.previous, "Expected '}' after function statement(s).");
             
-        node.end = cast(uint)(ast.length);
+        node.end = cast(uint)(ast.size);
         return id;
     }
 
@@ -471,6 +474,7 @@ struct Parser
     // Start the parser
     bool start()
     {
+        ast.initialize();
         had_error = false;
 
         learn();

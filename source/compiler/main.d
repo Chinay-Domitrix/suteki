@@ -6,6 +6,8 @@ import std.file;
 import compiler.typer;
 import compiler.config;
 
+import utilities.list;
+
 void main(string[] args)
 {
     // Read all input files

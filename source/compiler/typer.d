@@ -156,11 +156,18 @@ struct Typer
     // Compare types
     bool compare(int a, int b)
     {
+        // NOTE: 'a' is always going to be like function type
+        // and 'b' the return type or something.
+
         if (a == b)
             return true;
         else if ((a >= type_bool && a <= type_long) && (b >= type_bool && b <= type_long))
             return true;
         else if ((a >= type_single && a <= type_double) && (b >= type_single && b <= type_double))
+            return true;
+        else if ((a >= type_single && a <= type_double) && (b >= type_bool && b <= type_long))
+            return true;
+        else if (a == type_floating && b == type_integer)
             return true;
 
         return false;
@@ -219,8 +226,10 @@ struct Typer
         if (!parser.start())
             return false;
 
-        foreach (i, node; parser.ast)
+        for (ulong i = 0; i < parser.ast.size; ++i)
         {
+            Node *node = &parser.ast[i];
+
             switch (node.type)
             {
                 // Get function type
