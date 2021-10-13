@@ -1,4 +1,4 @@
-export suteki.io;
+module suteki.io;
 
 version (linux)
 {

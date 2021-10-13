@@ -8,6 +8,7 @@ import utilities.color;
 import utilities.string;
 
 import std.stdio;
+import std.conv;
 
 enum
 {
@@ -36,11 +37,9 @@ struct Parser
     Symbol[string] symbols;
 
     string main_file;
+    string current_source;
 
     Node[] ast;
-
-    // TODO: temporary
-    string   current_source;
 
     // Error 
     private void error(string message)
@@ -108,14 +107,32 @@ struct Parser
     }
 
     // Make AST node
-    private NodePtr make_node(uint type)
+    private Node *make_node(uint type, int *id = null)
     {
         Node node;
         node.type = type;
 
         ast ~= node;
 
-        return NodePtr(cast(uint)(ast.length) - 1);
+        if (id != null)
+            *id = (cast(uint)(ast.length) - 1);
+
+        return &ast[cast(uint)(ast.length) - 1];
+    }
+
+    // Make AST expression node
+    private Node *make_expression_node(uint type, int *id = null)
+    {
+        Node node;
+        node.type               = node_expression;
+        node.as_expression.type = type;
+
+        ast ~= node;
+
+        if (id != null)
+            *id = (cast(uint)(ast.length) - 1);
+
+        return &ast[cast(uint)(ast.length) - 1];
     }
 
     // Learn module
@@ -279,56 +296,61 @@ struct Parser
     }
 
     // Parse type
-    private NodePtr parse_type()
+    private int parse_type()
     {
+        int id = -1;
         advance();
 
         if (scanner.previous.type >= token_char && scanner.previous.type <= token_string_type)
         {
-            NodePtr    ptr  = make_node(node_type);
-            NodeType  *node = &ptr.get(ast).as_type;
+            NodeType  *node = cast(NodeType *)(make_node(node_type, &id));
             node.name       = scanner.previous;
-
-            return ptr;
         }
-        
-        error(scanner.previous, "Invalid type.");
-        return NodePtr(-1);
+        else
+            error(scanner.previous, "Expected type.");
+
+        return id;
     }
 
     // Parse expression
-    private NodePtr parse_expression()
+    private int parse_expression()
     {
-        NodePtr ptr;
+        int id;
 
         if (match(token_number))
         {
-            ptr = make_node(node_expression);
+            string number;
 
-            ExpressionPrimary *expression = &ptr.get(ast).as_expression.as_primary;
+            for (uint i = 0; i < scanner.previous.length; ++i)
+                number ~= scanner.previous.start[i];
+
+            ExpressionPrimary *expression = cast(ExpressionPrimary *)(make_expression_node(expression_primary, &id));
             expression.type               = primary_number;
-            expression.as_number          = 0; // TODO: parse number
+            expression.as_number          = to!(double)(number);
         }
         else if (match(token_string))
         {
-            ptr = make_node(node_expression);
+            string str;
 
-            ExpressionPrimary *expression = &ptr.get(ast).as_expression.as_primary;
+            for (uint i = 0; i < scanner.previous.length; ++i)
+                str ~= scanner.previous.start[i];
+
+            ExpressionPrimary *expression = cast(ExpressionPrimary *)(make_expression_node(expression_primary, &id));
             expression.type               = primary_string;
-            expression.as_string          = "string"; // TODO: parse string
+            expression.as_string          = str;
         }
 
-        return ptr;
+        return id;
     }
 
     // Parse return statement
     private void parse_return_statement()
     {
-        NodeReturnStatement *node = &make_node(node_return_statement).get(ast).as_return_statement;
+        NodeReturnStatement *node = cast(NodeReturnStatement *)(make_node(node_return_statement));
         node.start                = scanner.previous;
 
         if (match(token_semicolon))
-            node.expression = NodePtr(-1);
+            node.expression = -1;
         else
         {
             node.expression = parse_expression();
@@ -358,10 +380,10 @@ struct Parser
     }
 
     // Parse block of statements
-    private NodePtr parse_block()
+    private int parse_block()
     {
-        NodePtr    ptr  = make_node(node_block);
-        NodeBlock *node = &ptr.get(ast).as_block;
+        int        id;
+        NodeBlock *node = cast(NodeBlock *)(make_node(node_block, &id));
 
         while (!match(token_right_brace) && !match(token_end))
             parse_statement();
@@ -370,13 +392,13 @@ struct Parser
             error(scanner.previous, "Expected '}' after function statement(s).");
             
         node.end = cast(uint)(ast.length);
-        return ptr;
+        return id;
     }
 
     // Parse function definition
     private void parse_function_definition()
     {
-        NodeFunctionDeclaration *node = &make_node(node_function_declaration).get(ast).as_function_declaration; 
+        NodeFunctionDeclaration *node = cast(NodeFunctionDeclaration *)(make_node(node_function_declaration)); 
 
         consume(token_identifier, "Expected function name after 'define'.");
         node.name = scanner.previous;
@@ -387,7 +409,7 @@ struct Parser
         if (match(token_colon))
             node.type = parse_type();
         else
-            node.type = NodePtr(-1);
+            node.type = -1;
 
         consume(token_left_brace, "Expected '{'.");
         node.block = parse_block();

@@ -1,7 +1,11 @@
 module test.a;
-import sus;
 
-define main()
+define main(): double
 {
-    return;
+    return 3;
+}
+
+define main(): single
+{
+    return 3.5;
 }

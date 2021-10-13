@@ -28,22 +28,11 @@ enum
     primary_string,
 }
 
-struct NodePtr
-{
-    int index;
-
-    // Get node
-    Node *get(ref Node[] ast)
-    {
-        return &ast[index];
-    }
-}
-
 struct ExpressionBinary
 {
-    NodePtr left;
-    NodePtr right;
-    uint    operator;
+    int  left;
+    int  right;
+    uint operator;
 }
 
 struct ExpressionPrimary
@@ -59,8 +48,8 @@ struct ExpressionPrimary
 
 struct ExpressionUnary 
 {
-    NodePtr operand;
-    uint    operator;
+    int  operand;
+    uint operator;
 }
 
 struct NodeExpression
@@ -73,6 +62,21 @@ struct NodeExpression
     }
 
     uint type;
+
+    ExpressionBinary *opCast(T : ExpressionBinary *)()
+    {
+        return &as_binary;
+    }
+
+    ExpressionPrimary *opCast(T : ExpressionPrimary *)()
+    {
+        return &as_primary;
+    }
+
+    ExpressionUnary *opCast(T : ExpressionUnary *)()
+    {
+        return &as_unary;
+    }
 }
 
 struct NodeType
@@ -82,17 +86,17 @@ struct NodeType
 
 struct NodeFunctionDeclaration
 {
-    Token     name;
-    NodePtr[] parameters;
-    NodePtr   block;
-    NodePtr   type;
+    Token   name;
+    int  [] parameters;
+    int     block;
+    int     type;
 }
 
 struct NodeFunctionParameter
 {
-    Token   name;
-    NodePtr type;
-    NodePtr expression;
+    Token name;
+    int   type;
+    int   expression;
 }
 
 struct NodeBlock
@@ -102,8 +106,8 @@ struct NodeBlock
 
 struct NodeReturnStatement
 {
-    Token   start;
-    NodePtr expression;
+    Token start;
+    int   expression;
 }
 
 struct Node
@@ -120,4 +124,34 @@ struct Node
     }
 
     uint type;
+
+    NodeType *opCast(T : NodeType *)()
+    {
+        return &as_type;
+    }
+
+    NodeFunctionDeclaration *opCast(T : NodeFunctionDeclaration *)()
+    {
+        return &as_function_declaration;
+    }
+
+    NodeFunctionParameter *opCast(T : NodeFunctionParameter *)()
+    {
+        return &as_function_parameter;
+    }
+
+    NodeBlock *opCast(T : NodeBlock *)()
+    {
+        return &as_block;
+    }
+
+    NodeReturnStatement *opCast(T : NodeReturnStatement *)()
+    {
+        return &as_return_statement;
+    }
+
+    NodeExpression *opCast(T : NodeExpression *)()
+    {
+        return &as_expression;
+    }
 }

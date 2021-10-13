@@ -13,5 +13,5 @@ void main(string[] args)
         g_inputs ~= readText(args[i]);
 
     Typer typer;
-    typer.start();   
+    typer.start();
 }
