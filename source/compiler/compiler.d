@@ -3,6 +3,8 @@ module compiler.compiler;
 import compiler.typer;
 import compiler.ir;
 import compiler.ast;
+import compiler.x64_backend;
+import compiler.config;
 import utilities.list;
 
 import std.stdio;
@@ -10,12 +12,13 @@ import std.stdio;
 struct Compiler
 {
     Typer typer;
-    bool  had_error;
     ulong node_id;
 
     List!(IRInstruction) instructions;
     List!(IRValue)       values;
     List!(BasicBlock)    blocks;
+
+    X64Backend x64_backend;
 
     // Make IR instruction
     private IRInstruction *make_instruction(uint type)
@@ -61,8 +64,6 @@ struct Compiler
     // Start the compiler
     bool start()
     {
-        had_error = false;
-
         instructions.initialize();
         values      .initialize();
         blocks      .initialize();
@@ -99,20 +100,15 @@ struct Compiler
             }
         }
 
-        for (ulong i = 0; i < instructions.size; ++i)
+        final switch (g_backend)
         {
-            IRInstruction *instruction = &instructions[i];
-
-            final switch (instruction.type)
+            case backend_x64:
             {
-                case ir_return:
-                {
-                    writeln("    ret void");
-                    break;
-                }
+                x64_backend.convert(&this);
+                break;
             }
         }
 
-        return !had_error;
+        return true;
     }
 }

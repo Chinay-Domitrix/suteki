@@ -3,7 +3,4 @@ module test.a;
 define main()
 {
     return;
-    return;
-    return;
-    return;
 }
