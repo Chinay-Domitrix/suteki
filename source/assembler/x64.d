@@ -67,7 +67,8 @@ struct X64Assembler
     // SYSCALL
     void syscall()
     {
-        code ~= cast(ubyte)(0x050F);
+        code ~= 0x0F;
+        code ~= 0x05;
     }
 
     // LEAVE
