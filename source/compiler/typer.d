@@ -30,8 +30,8 @@ private enum
 
 struct Typer
 {
-    Parser  parser;
-    bool    had_error;
+    Parser parser;
+    bool   had_error;
 
     int function_id;
 
@@ -63,7 +63,7 @@ struct Typer
     }
     
     // Get type
-    int get_node_type(NodeType *type)
+    private int get_node_type(NodeType *type)
     {
         switch (type.name.type)
         {
@@ -113,7 +113,7 @@ struct Typer
     }
 
     // Get type as number type
-    int get_type_number(int type)
+    private int get_type_number(int type)
     {
         final switch (type)
         {
@@ -134,7 +134,7 @@ struct Typer
     }
 
     // Get number type
-    int get_number_type(double number)
+    private int get_number_type(double number)
     {
         if ((cast(int)(number) - number) != 0)
         {
@@ -155,7 +155,7 @@ struct Typer
     }
 
     // Compare types
-    bool compare(int a, int b)
+    private bool compare(int a, int b)
     {
         // NOTE: 'a' is always going to be like function type
         // and 'b' the return type or something.
@@ -175,7 +175,7 @@ struct Typer
     }
 
     // Get primary type
-    int get_primary_type(ExpressionPrimary *primary)
+    private int get_primary_type(ExpressionPrimary *primary)
     {
         final switch(primary.type)
         {
@@ -188,7 +188,7 @@ struct Typer
     }
     
     // Get expression type
-    int get_expression_type(NodeExpression *expression)
+    private int get_expression_type(NodeExpression *expression)
     {
         final switch (expression.type)
         {
@@ -198,7 +198,7 @@ struct Typer
     }
 
     // Check return statement
-    void check_return_statement(NodeReturnStatement *node)
+    private void check_return_statement(NodeReturnStatement *node)
     { 
         int function_type;
         int return_type;

@@ -7,24 +7,15 @@ enum
 
 enum 
 {
-    type_i8,
-    type_i16,
-    type_i32,
-    type_i64,
-    type_f32,
-    type_f64,
-    type_ptr,
-    type_addr,
-}
-
-struct IRValuePtr
-{
-    uint index;
-}
-
-struct IRPtr
-{
-    uint index;
+    ir_type_void,
+    ir_type_i8,
+    ir_type_i16,
+    ir_type_i32,
+    ir_type_i64,
+    ir_type_f32,
+    ir_type_f64,
+    ir_type_ptr,
+    ir_type_addr,
 }
 
 struct IRValue
@@ -46,8 +37,8 @@ struct IRValue
 
 struct IRReturn
 {
-    IRValuePtr value;
-    uint       type;
+    int  value;
+    uint type;
 }
 
 struct IRInstruction
@@ -58,4 +49,15 @@ struct IRInstruction
     }
 
     uint type;
+
+    IRReturn *opCast(T : IRReturn *)()
+    {
+        return &as_return;
+    }
+}
+
+struct BasicBlock
+{
+    int start;
+    int end;
 }
