@@ -4,6 +4,7 @@ import std.stdio;
 import std.file;
 
 import compiler.compiler;
+import compiler.linker;
 import compiler.config;
 
 void main(string[] args)
@@ -14,4 +15,5 @@ void main(string[] args)
 
     Compiler compiler;
     compiler.start();
+    link(&compiler);
 }

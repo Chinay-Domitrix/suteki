@@ -8,7 +8,7 @@ import std.stdio;
 
 struct X64Backend
 {
-    private X64Assembler  assembler;
+    public  X64Assembler  assembler;
     private Compiler     *compiler;
 
     IRInstruction *instruction;
@@ -20,6 +20,10 @@ struct X64Backend
 
         if (return_instruction.value == -1)
         {
+            assembler.mov(g_eax, 60);
+            assembler.mov(g_edi, 123);
+            assembler.syscall();
+
             assembler.xor(g_eax, g_eax);
             assembler.ret();
         }
@@ -45,7 +49,5 @@ struct X64Backend
                 }
             }
         }
-
-        writeln(assembler.code);
     }
 }
