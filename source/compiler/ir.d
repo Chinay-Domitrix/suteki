@@ -37,8 +37,7 @@ struct IRValue
 
 struct IRReturn
 {
-    int  value;
-    uint type;
+    int value;
 }
 
 struct IRInstruction

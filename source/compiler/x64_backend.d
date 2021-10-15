@@ -17,18 +17,34 @@ struct X64Backend
     void convert_return()
     {
         IRReturn *return_instruction = cast(IRReturn *)(instruction);
-
-        if (return_instruction.value == -1)
+        IRValue  *return_value       = &compiler.values[return_instruction.value];
+    
+        final switch (return_value.type)
         {
-            assembler.mov(g_eax, 60);
-            assembler.mov(g_edi, 123);
-            assembler.syscall();
+            case ir_type_void:
+            {
+                assembler.mov(g_eax, 60);
+                assembler.xor(g_edi, g_edi);
+                assembler.syscall();
+                break;
+            }
 
-            assembler.xor(g_eax, g_eax);
-            assembler.ret();
+            case ir_type_i8:
+            {
+                assembler.mov(g_eax, 60);
+                assembler.mov(g_edi, return_value.as_i8);
+                assembler.syscall();
+                break;
+            }
+
+            case ir_type_i32:
+            {
+                assembler.mov(g_eax, 60);
+                assembler.mov(g_edi, return_value.as_i32);
+                assembler.syscall();
+                break;
+            }
         }
-        else
-            writeln("TODO: handle this at x64_backend.d:27");
     }
 
     // Convert IR into x64

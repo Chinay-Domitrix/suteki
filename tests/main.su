@@ -1,6 +1,6 @@
-module test.a;
+module main;
 
-define main()
+define main(): int
 {
-    return;
+    return 123;
 }

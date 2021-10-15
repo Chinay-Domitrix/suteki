@@ -29,18 +29,95 @@ struct Compiler
         return &instructions[instructions.add(instruction)];
     }
 
+    // Make IR value
+    private IRValue *make_value(uint type, int *_id = null)
+    {
+        IRValue value;
+        value.type = type;
+
+        int id = cast(int)(values.add(value));
+
+        if (_id != null)
+            *_id = id;
+
+        return &values[id];
+    }
+
+    // Convert primary to value
+    private int convert_primary(ExpressionPrimary *primary)
+    {
+        int id;
+
+        final switch (primary.type)
+        {
+            case primary_number:
+            {
+                if ((cast(int)(primary.as_number) - primary.as_number) != 0)
+                {
+                    if (primary.as_number < float.max)
+                    {
+                        IRValue *value = make_value(ir_type_f32, &id);
+                        value.as_f32   = cast(float)(primary.as_number);
+                    }
+                    else
+                    {
+                        IRValue *value = make_value(ir_type_f64, &id);
+                        value.as_f64   = primary.as_number;
+                    }
+                }
+                else
+                {
+                    if (primary.as_number < byte.max)
+                    {
+                        IRValue *value = make_value(ir_type_i8, &id);
+                        value.as_i8    = cast(byte)(primary.as_number);
+                    }
+                    else if (primary.as_number < short.max)
+                    {
+                        IRValue *value = make_value(ir_type_i16, &id);
+                        value.as_i16   = cast(short)(primary.as_number);
+                    }
+                    else if (primary.as_number < int.max)
+                    {
+                        IRValue *value = make_value(ir_type_i32, &id);
+                        value.as_i32   = cast(int)(primary.as_number);
+                    }
+                    else
+                    {
+                        IRValue *value = make_value(ir_type_i64, &id);
+                        value.as_i64   = cast(long)(primary.as_number);
+                    }
+                }
+                break;
+            }
+        }
+
+        return id;
+    }
+
+    // Convert expression to value
+    private int convert_expression(NodeExpression *expression)
+    {
+        int id;
+
+        final switch (expression.type)
+        {
+            case expression_primary:
+                return convert_primary(&expression.as_primary);
+        }
+
+        return id;
+    }
+
     // Convert return statement
     private void convert_return_statement(NodeReturnStatement *node)
     {
         IRReturn *instruction = cast(IRReturn *)(make_instruction(ir_return));
 
         if (node.expression == -1)
-        {
-            instruction.type  = ir_type_void;
-            instruction.value = -1;
-        }
+            make_value(ir_type_void, &instruction.value);
         else
-            writeln("TODO: handle this at compiler.d:40");
+            instruction.value = convert_expression(cast(NodeExpression *)(typer.parser.ast[node.expression]));
     }
 
     // Convert nodes to IR

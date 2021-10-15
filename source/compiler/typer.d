@@ -138,17 +138,17 @@ struct Typer
     {
         if ((cast(int)(number) - number) != 0)
         {
-            if (number < float.sizeof)
+            if (number < float.max)
                 return type_single;
             else
                 return type_double;
         }
 
-        if (number < byte.sizeof)
+        if (number < byte.max)
             return type_byte;
-        else if (number < short.sizeof)
+        else if (number < short.max)
             return type_short;
-        else if (number < int.sizeof)
+        else if (number < int.max)
             return type_int;
         
         return type_long;
