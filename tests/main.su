@@ -1,6 +1,6 @@
-module main;
+export main;
 
-define main(): int
+int main()
 {
-    return 123;
+    return 99;
 }
