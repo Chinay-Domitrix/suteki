@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Suteki
@@ -18,6 +17,7 @@ namespace Suteki
         RightBrace,
         Comma,
         Semicolon,
+        Dot,
 
         Export,
         Import,
@@ -58,6 +58,8 @@ namespace Suteki
         public uint                          Line;
         public uint                          Column;
         public Dictionary<string, TokenType> Keywords;
+        public Token                         PreviousToken;
+        public Token                         CurrentToken;
 
         // Initialize the Scanner
         public Scanner(string source)
@@ -117,7 +119,7 @@ namespace Suteki
         }
 
         // Make number Token
-        public Token MakeNumberToken()
+        public TokenType MakeNumberToken()
         {
             while (char.IsDigit(Source[Current]))
                 Advance();
@@ -133,24 +135,29 @@ namespace Suteki
             string numberAsString = Source.Substring(Start, Current - Start);
             double number         = double.Parse(numberAsString);
 
-            return new Token(TokenType.Number, number, Line, Column);
+            CurrentToken = new Token(TokenType.Number, number, Line, Column);
+            return TokenType.Number;
         }
 
         // Make string Token
-        public Token MakeStringToken()
+        public TokenType MakeStringToken()
         {
             while (Source[Current] != '"')
                 Advance();
 
             if (Source[Current] == '\0')
-                return new Token(TokenType.Error, "Unterminated string.", Line, Column);
+            {
+                CurrentToken = new Token(TokenType.Error, "Unterminated string.", Line, Column);
+                return TokenType.Error;
+            }
 
             Advance();
-            return new Token(TokenType.String, Source.Substring(Start, Current - Start), Line, Column);
+            CurrentToken = new Token(TokenType.String, Source.Substring(Start, Current - Start), Line, Column);
+            return TokenType.String;
         }
 
         // Make identifier Token
-        public Token MakeIdentifierToken()
+        public TokenType MakeIdentifierToken()
         {
             while (char.IsLetterOrDigit(Source[Current]) || Source[Current] == '_')
                 Advance();
@@ -158,20 +165,28 @@ namespace Suteki
             string identifier = Source.Substring(Start, Current - Start);
 
             if (Keywords.ContainsKey(identifier))
-                return new Token(Keywords[identifier], Line, Column);
+            {
+                CurrentToken = new Token(Keywords[identifier], Line, Column);
+                return Keywords[identifier];
+            }
 
-            return new Token(TokenType.Identifier, identifier, Line, Column);
+            CurrentToken = new Token(TokenType.Identifier, identifier, Line, Column);
+            return TokenType.Identifier;
         }
 
         // Scan Token
-        public Token Scan()
+        public TokenType Scan()
         {
             SkipWhitespace();
-            Start = Current;
+            Start         = Current;
+            PreviousToken = CurrentToken;
 
             // Source end?
             if (Source[Current] == '\0')
-                return new Token(TokenType.End, Line, Column);
+            {
+                CurrentToken = new Token(TokenType.End, Line, Column);
+                return TokenType.End;
+            }
 
             char character = Advance();
 
@@ -186,29 +201,54 @@ namespace Suteki
             switch (character)
             {
                 case '(':
-                    return new Token(TokenType.LeftParenthesis, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.LeftParenthesis, Line, Column);
+                    return TokenType.LeftParenthesis;
+                }
 
                 case ')':
-                    return new Token(TokenType.RightParenthesis, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.RightParenthesis, Line, Column);
+                    return TokenType.RightParenthesis;
+                }
 
                 case '{':
-                    return new Token(TokenType.LeftBrace, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.LeftBrace, Line, Column);
+                    return TokenType.LeftBrace;
+                }
 
                 case '}':
-                    return new Token(TokenType.RightBrace, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.RightBrace, Line, Column);
+                    return TokenType.RightBrace;
+                }
 
                 case ',':
-                    return new Token(TokenType.Comma, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.Comma, Line, Column);
+                    return TokenType.Comma;
+                }
 
                 case ';':
-                    return new Token(TokenType.Semicolon, Line, Column);
+                {
+                    CurrentToken = new Token(TokenType.Semicolon, Line, Column);
+                    return TokenType.Semicolon;
+                }
+
+                case '.':
+                {
+                    CurrentToken = new Token(TokenType.Dot, Line, Column);
+                    return TokenType.Dot;
+                }
 
                 case '"':
                     return MakeStringToken();
             }
 
             // Unexpected character
-            return new Token(TokenType.Error, "Unexpected character.", Line, Column);
+            CurrentToken = new Token(TokenType.Error, "Unexpected character.", Line, Column);
+            return TokenType.Error;
         }
     }
 }
