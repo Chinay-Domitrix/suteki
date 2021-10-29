@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Suteki
@@ -78,7 +79,11 @@ namespace Suteki
         public char Advance()
         {
             ++Column;
-            return Source[Current++];
+
+            if (Current <= Source.Length)
+                ++Current;
+
+            return Source[Current - 1];
         }
 
         // Skip whitespace
@@ -121,11 +126,11 @@ namespace Suteki
             {
                 Advance();
 
-                while (Current < Source.Length && char.IsDigit(Source[Current]))
+                while (char.IsDigit(Source[Current]))
                     Advance();
             }
 
-            string numberAsString = Source.Substring(Start, Current);
+            string numberAsString = Source.Substring(Start, Current - Start);
             double number         = double.Parse(numberAsString);
 
             return new Token(TokenType.Number, number, Line, Column);
@@ -134,39 +139,39 @@ namespace Suteki
         // Make string Token
         public Token MakeStringToken()
         {
-            while (Current < Source.Length && Source[Current] != '"')
+            while (Source[Current] != '"')
                 Advance();
 
-            if (Current >= Source.Length)
+            if (Source[Current] == '\0')
                 return new Token(TokenType.Error, "Unterminated string.", Line, Column);
 
             Advance();
-            return new Token(TokenType.String, Source.Substring(Start, Current), Line, Column);
+            return new Token(TokenType.String, Source.Substring(Start, Current - Start), Line, Column);
         }
 
         // Make identifier Token
         public Token MakeIdentifierToken()
         {
-            while (Current < Source.Length && (char.IsLetterOrDigit(Source[Current]) || Source[Current] == '_'))
+            while (char.IsLetterOrDigit(Source[Current]) || Source[Current] == '_')
                 Advance();
 
-            string identifier = Source.Substring(Start, Current);
+            string identifier = Source.Substring(Start, Current - Start);
 
             if (Keywords.ContainsKey(identifier))
                 return new Token(Keywords[identifier], Line, Column);
 
-            return new Token(TokenType.Identifier, Source.Substring(Start, Current), Line, Column);
+            return new Token(TokenType.Identifier, identifier, Line, Column);
         }
 
         // Scan Token
         public Token Scan()
         {
-            // Source end?
-            if (Current >= Source.Length || Source[Current] == '\0')
-                return new Token(TokenType.End, Line, Column);
-
             SkipWhitespace();
             Start = Current;
+
+            // Source end?
+            if (Source[Current] == '\0')
+                return new Token(TokenType.End, Line, Column);
 
             char character = Advance();
 
