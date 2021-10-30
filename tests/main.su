@@ -1,9 +1,4 @@
-export tests.main;
-
-int hello;
-
 int main()
 {
-    int hello;
-    return 99;
+    return 0;
 }

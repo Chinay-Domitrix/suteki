@@ -11,6 +11,7 @@ namespace Suteki
         public Scanner                        CurrentScanner;
         public bool                           HadError;
         public Dictionary<string, UserType>   UserTypes;
+        public FileInput                      CurrentInput;
 
         // Initialize the Compiler
         public Compiler()
@@ -54,7 +55,7 @@ namespace Suteki
         public void Error(Token token, string message)
         {
             HadError = true;
-            Utilities.WriteColor(ConsoleColor.Red, $"[{token.Line}:{token.Column}] Error");
+            Utilities.WriteColor(ConsoleColor.Red, $"[{CurrentInput.Path}:{token.Line}:{token.Column}] Error");
 
             if (token.Type == TokenType.End)
                 Utilities.WriteColor(ConsoleColor.Red, " at end: ");
@@ -115,8 +116,8 @@ namespace Suteki
         // Learn everything
         public bool Learn()
         {
-            FileInput                  input;
             Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>();
+            Dictionary<string, Symbol> symbolTable;
 
             // Loop thorugh every file and learn every global 
             // symbol from it
@@ -124,8 +125,8 @@ namespace Suteki
             {
                 symbols.Clear();
 
-                input          = Program.Inputs[index];
-                CurrentScanner = new Scanner(input.Source);
+                CurrentInput   = Program.Inputs[index];
+                CurrentScanner = new Scanner(CurrentInput.Source);
 
                 // Start learning everything possible
                 Advance();
@@ -162,7 +163,7 @@ namespace Suteki
                             Consume(TokenType.Semicolon, "Expected ';' after module name.");
 
                             // Make the module
-                            input.ModuleName = moduleName;
+                            CurrentInput.ModuleName = moduleName;
 
                             if (!Modules.ContainsKey(moduleName))
                                 Modules[moduleName] = new Module();
@@ -200,12 +201,22 @@ namespace Suteki
                                 symbol.Type = SymbolType.Variable;
 
                             // Make sure that symbol was not declared before
-                            if (Symbols.ContainsKey(nameString) || symbols.ContainsKey(nameString))
+                            if (CurrentInput.ModuleName != "")
+                                symbolTable = Modules[CurrentInput.ModuleName].Symbols;
+                            else
+                                symbolTable = Symbols;
+
+                            if (symbolTable.ContainsKey(nameString))
                                 Error(nameToken, "This symbol was already declared.");
                             
                             // Is entry point function declaration?
                             if (nameString == "main" && symbol.Type == SymbolType.Function)
+                            {
+                                if (MainFile != -1)
+                                    Error(nameToken, "The main function was already declared.");
+        
                                 MainFile = index;
+                            }
 
                             // Add symbol
                             symbols[nameString] = symbol;
@@ -250,10 +261,8 @@ namespace Suteki
                 }
 
                 // Add all symbols to module symbols or global symbols
-                Dictionary<string, Symbol> symbolTable;
-
-                if (input.ModuleName != "")
-                    symbolTable = Modules[input.ModuleName].Symbols;
+                if (CurrentInput.ModuleName != "")
+                    symbolTable = Modules[CurrentInput.ModuleName].Symbols;
                 else
                     symbolTable = Symbols;
 
@@ -289,13 +298,11 @@ namespace Suteki
             if (!Learn())
                 return false;
 
-            FileInput input;
-
             // Loop thorugh every file and generate C files
             for (int index = 0; index < Program.Inputs.Count; ++index)
             {
-                input          = Program.Inputs[index];
-                CurrentScanner = new Scanner(input.Source);
+                CurrentInput   = Program.Inputs[index];
+                CurrentScanner = new Scanner(CurrentInput.Source);
 
                 // Start learning everything possible
                 Advance();

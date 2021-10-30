@@ -6,14 +6,40 @@ namespace Suteki
 {
     class Program
     {
-        public static List<FileInput> Inputs;
+        public static List<FileInput> Inputs = new List<FileInput>();
+
+        // Parse arguments
+        public static bool ParseArguments(string[] arguments)
+        {
+            for (int i = 0; i < arguments.Length; ++i)
+            {
+                string argument = arguments[i];
+
+                // Parse argument
+                if (argument.Contains(".su"))
+                    Inputs.Add(new FileInput(argument, File.ReadAllText(argument) + '\0'));
+                else
+                {
+                    Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"Invalid option '{argument}'.\n");
+                    return false;
+                }
+            }
+
+            // Make sure we have inputs
+            if (Inputs.Count == 0)
+            {
+                Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, "No input files.\n");
+                return false;
+            }
+
+            return true;
+        }
 
         static void Main(string[] args)
         {
-            // Read inputs
-            Inputs = new List<FileInput>();
-            Inputs.Add(new FileInput("tests/main.su",    File.ReadAllText("../tests/main.su")    + '\0'));
-            Inputs.Add(new FileInput("tests/another.su", File.ReadAllText("../tests/another.su") + '\0'));
+            // Parse command line arguments
+            if (!ParseArguments(args))
+                return;
 
             // Compile
             Compiler compiler = new Compiler();
