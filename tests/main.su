@@ -1,6 +1,9 @@
-export main;
+export tests.main;
+
+int hello;
 
 int main()
 {
+    int hello;
     return 99;
 }

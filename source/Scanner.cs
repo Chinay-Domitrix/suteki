@@ -2,54 +2,6 @@ using System.Collections.Generic;
 
 namespace Suteki
 {
-    enum TokenType
-    {
-        Error,
-        End,
-
-        Identifier,
-        String,
-        Number,
-
-        LeftParenthesis,
-        RightParenthesis,
-        LeftBrace,
-        RightBrace,
-        Comma,
-        Semicolon,
-        Dot,
-
-        Export,
-        Import,
-
-        Return,
-    }
-
-    class Token
-    {
-        public TokenType Type;
-        public object    Data;
-        public uint      Line;
-        public uint      Column;
-
-        // Initialize the Token
-        public Token(TokenType type, object data, uint line, uint column)
-        {
-            Type     = type;
-            Data     = data;
-            Line     = line;
-            Column   = column;
-        }
-
-        // Initialize the Token
-        public Token(TokenType type, uint line, uint column)
-        {
-            Type   = type;
-            Line   = line;
-            Column = column;
-        }
-    }
-
     class Scanner 
     {
         public string                        Source;
@@ -70,6 +22,9 @@ namespace Suteki
             Line     = 1;
             Column   = 1;
             Keywords = new Dictionary<string, TokenType>();
+
+            // TODO: add the other types
+            Keywords.Add("int", TokenType.Int);
 
             Keywords.Add("export", TokenType.Export);
             Keywords.Add("import", TokenType.Import);
@@ -118,6 +73,27 @@ namespace Suteki
             }
         }
 
+        // Make Token
+        public TokenType MakeToken(TokenType type)
+        {
+            CurrentToken = new Token(type, Source.Substring(Start, Current - Start), Line, Column);
+            return type;
+        }
+
+        // Make Token with custom data
+        public TokenType MakeToken(TokenType type, object data)
+        {
+            CurrentToken = new Token(type, data, Line, Column);
+            return type;
+        }
+
+        // Make error Token
+        public TokenType MakeToken(string message)
+        {
+            CurrentToken = new Token(TokenType.Error, message, Line, Column);
+            return TokenType.Error;
+        }
+
         // Make number Token
         public TokenType MakeNumberToken()
         {
@@ -135,8 +111,7 @@ namespace Suteki
             string numberAsString = Source.Substring(Start, Current - Start);
             double number         = double.Parse(numberAsString);
 
-            CurrentToken = new Token(TokenType.Number, number, Line, Column);
-            return TokenType.Number;
+            return MakeToken(TokenType.Number, number);
         }
 
         // Make string Token
@@ -146,14 +121,10 @@ namespace Suteki
                 Advance();
 
             if (Source[Current] == '\0')
-            {
-                CurrentToken = new Token(TokenType.Error, "Unterminated string.", Line, Column);
-                return TokenType.Error;
-            }
+                return MakeToken("Unterminated string.");
 
             Advance();
-            CurrentToken = new Token(TokenType.String, Source.Substring(Start, Current - Start), Line, Column);
-            return TokenType.String;
+            return MakeToken(TokenType.String);
         }
 
         // Make identifier Token
@@ -165,13 +136,9 @@ namespace Suteki
             string identifier = Source.Substring(Start, Current - Start);
 
             if (Keywords.ContainsKey(identifier))
-            {
-                CurrentToken = new Token(Keywords[identifier], Line, Column);
-                return Keywords[identifier];
-            }
+                return MakeToken(Keywords[identifier]);
 
-            CurrentToken = new Token(TokenType.Identifier, identifier, Line, Column);
-            return TokenType.Identifier;
+            return MakeToken(TokenType.Identifier);
         }
 
         // Scan Token
@@ -183,10 +150,7 @@ namespace Suteki
 
             // Source end?
             if (Source[Current] == '\0')
-            {
-                CurrentToken = new Token(TokenType.End, Line, Column);
-                return TokenType.End;
-            }
+                return MakeToken(TokenType.End);
 
             char character = Advance();
 
@@ -201,54 +165,32 @@ namespace Suteki
             switch (character)
             {
                 case '(':
-                {
-                    CurrentToken = new Token(TokenType.LeftParenthesis, Line, Column);
-                    return TokenType.LeftParenthesis;
-                }
+                    return MakeToken(TokenType.LeftParenthesis);
 
                 case ')':
-                {
-                    CurrentToken = new Token(TokenType.RightParenthesis, Line, Column);
-                    return TokenType.RightParenthesis;
-                }
+                    return MakeToken(TokenType.RightParenthesis);
 
                 case '{':
-                {
-                    CurrentToken = new Token(TokenType.LeftBrace, Line, Column);
-                    return TokenType.LeftBrace;
-                }
+                    return MakeToken(TokenType.LeftBrace);
 
                 case '}':
-                {
-                    CurrentToken = new Token(TokenType.RightBrace, Line, Column);
-                    return TokenType.RightBrace;
-                }
+                    return MakeToken(TokenType.RightBrace);
 
                 case ',':
-                {
-                    CurrentToken = new Token(TokenType.Comma, Line, Column);
-                    return TokenType.Comma;
-                }
+                    return MakeToken(TokenType.Comma);
 
                 case ';':
-                {
-                    CurrentToken = new Token(TokenType.Semicolon, Line, Column);
-                    return TokenType.Semicolon;
-                }
+                    return MakeToken(TokenType.Semicolon);
 
                 case '.':
-                {
-                    CurrentToken = new Token(TokenType.Dot, Line, Column);
-                    return TokenType.Dot;
-                }
+                    return MakeToken(TokenType.Dot);
 
                 case '"':
                     return MakeStringToken();
             }
 
             // Unexpected character
-            CurrentToken = new Token(TokenType.Error, "Unexpected character.", Line, Column);
-            return TokenType.Error;
+            return MakeToken("Unexpected character.");
         }
     }
 }
