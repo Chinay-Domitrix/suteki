@@ -1,5 +1,5 @@
-#ifndef ANOTHER_H
-#define ANOTHER_H
+#ifndef TESTS_ANOTHER_H
+#define TESTS_ANOTHER_H
 
 
 #endif

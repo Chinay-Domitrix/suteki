@@ -12,12 +12,17 @@ namespace Suteki
             // Write files
             foreach (FileInput input in Program.Inputs)
             {
-                // Get input file name
-                string fileName = Path.GetFileName(input.Path).Replace(".su", "");
-                string path     = outputPath + fileName;
+                // Get input information
+                string headerName = input.ModuleName.Replace(".", "_");
+                string fileName   = Path.GetFileName(input.Path).Replace(".su", "");
+                string path       = outputPath + fileName;
+
+                // Make sure header name isn't empty
+                if (headerName == "")
+                    headerName = fileName;
                 
                 // Add header guards
-                string newHeaderOutput = $"#ifndef {fileName.ToUpper()}_H\n#define {fileName.ToUpper()}_H\n\n";
+                string newHeaderOutput = $"#ifndef {headerName.ToUpper()}_H\n#define {headerName.ToUpper()}_H\n\n";
                 newHeaderOutput += input.HeaderOutput;
                 newHeaderOutput += "\n#endif";
 
