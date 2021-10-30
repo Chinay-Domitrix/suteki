@@ -1,0 +1,1 @@
+dotnet run ../tests/main.su ../tests/another.su --output ../tests/out/

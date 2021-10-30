@@ -293,7 +293,7 @@ namespace Suteki
         }
 
         // Start compiling 
-        public bool Compile()
+        public bool Start()
         {
             if (!Learn())
                 return false;

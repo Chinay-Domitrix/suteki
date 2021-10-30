@@ -6,7 +6,8 @@ namespace Suteki
 {
     class Program
     {
-        public static List<FileInput> Inputs = new List<FileInput>();
+        public static List<FileInput> Inputs     = new List<FileInput>();
+        public static string          OutputPath = "";
 
         // Parse arguments
         public static bool ParseArguments(string[] arguments)
@@ -16,11 +17,35 @@ namespace Suteki
                 string argument = arguments[i];
 
                 // Parse argument
-                if (argument.Contains(".su"))
+                if (argument == "--output")
+                {
+                    if (OutputPath != "")
+                    {
+                        Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"Output path was already specified.\n");
+                        return false;
+                    }
+
+                    OutputPath = arguments[++i];
+
+                    if (!Directory.Exists(OutputPath))
+                    {
+                        Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"Directory '{OutputPath}' does not exists.\n");
+                        return false;
+                    }
+                }
+                else if (argument.Contains(".su"))
+                {
+                    if (!File.Exists(argument))
+                    {
+                        Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"File '{argument}' does not exists.\n");
+                        return false;
+                    }
+
                     Inputs.Add(new FileInput(argument, File.ReadAllText(argument) + '\0'));
+                }
                 else
                 {
-                    Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"Invalid option '{argument}'.\n");
+                    Utilities.WriteColor(ConsoleColor.Red, "Error: ", ConsoleColor.White, $"Invalid argument '{argument}'.\n");
                     return false;
                 }
             }
@@ -44,8 +69,11 @@ namespace Suteki
             // Compile
             Compiler compiler = new Compiler();
             
-            if (compiler.Compile())
+            if (compiler.Start())
                 Utilities.WriteColor(ConsoleColor.Green, "Everything was successfully compiled.\n");
+
+            // Link
+            Linker.Start(compiler);
         }
     }
 }
