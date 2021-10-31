@@ -8,4 +8,3 @@ void g_su_write()
 void g_su_exit()
 {
 }
-

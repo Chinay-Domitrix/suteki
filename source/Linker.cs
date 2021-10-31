@@ -71,6 +71,12 @@ namespace Suteki
 
                 newSourceOutput += '\n' + input.SourceOutput;
 
+                // Remove the spacing at the end
+                if (newSourceOutput.EndsWith("\n\n"))
+                    newSourceOutput = newSourceOutput.Substring(0, newSourceOutput.Length - 2);
+                else if (newSourceOutput.EndsWith('\n'))
+                    newSourceOutput = newSourceOutput.Substring(0, newSourceOutput.Length - 1);
+
                 // Write files
                 File.WriteAllText(path + ".h", newHeaderOutput);
                 File.WriteAllText(path + ".c", newSourceOutput);

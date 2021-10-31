@@ -6,4 +6,3 @@ int g_su_main()
 {
 	return 123;
 }
-
