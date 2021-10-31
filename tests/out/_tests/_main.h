@@ -4,6 +4,6 @@
 
 #include <global.h>
 
-extern int su_main();
+extern int g_su_main();
 
 #endif

@@ -2,7 +2,7 @@
 #include <_tests/_main.h>
 #include <_tests/_std.h>
 
-int su_main()
+int g_su_main()
 {
 	return 123;
 }

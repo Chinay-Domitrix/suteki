@@ -4,7 +4,7 @@
 
 #include <global.h>
 
-extern void su_write();
-extern void su_exit();
+extern void g_su_write();
+extern void g_su_exit();
 
 #endif

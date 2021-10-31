@@ -361,7 +361,7 @@ namespace Suteki
             string functionHeader = "";
 
             functionHeader += getTypeAsCType(typeToken);
-            functionHeader += $" su_{(string)nameToken.Data}(";
+            functionHeader += $" g_su_{(string)nameToken.Data}(";
 
             Advance();
             functionHeader += ")";
