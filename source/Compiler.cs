@@ -12,6 +12,7 @@ namespace Suteki
         public bool                           HadError;
         public Dictionary<string, UserType>   UserTypes;
         public FileInput                      CurrentInput;
+        public uint                           TabCount;
 
         // Initialize the Compiler
         public Compiler()
@@ -21,6 +22,7 @@ namespace Suteki
             UserTypes = new Dictionary<string, UserType>();
             MainFile  = -1;
             HadError  = false;
+            TabCount  = 0;
         }
 
         // Get previous Token
@@ -107,10 +109,55 @@ namespace Suteki
         // Is token a type?
         public bool IsType(Token token)
         {
-            if (token.Type == TokenType.Int)
+            if (token.Type >= TokenType.Void && token.Type <= TokenType.Double)
                 return true;
             else
                 return false;
+        }
+
+        // Get type as C type
+        public string getTypeAsCType(Token typeToken)
+        {
+            switch (typeToken.Type)
+            {
+                case TokenType.Void:
+                    return "void";
+
+                case TokenType.Bool:
+                    return "_Bool";
+                    
+                case TokenType.UByte:
+                    return "unsigned char";
+                    
+                case TokenType.UShort:
+                    return "unsigned short";
+                    
+                case TokenType.UInt:
+                    return "unsigned int";
+                    
+                case TokenType.ULong:
+                    return "unsigned long long";
+                    
+                case TokenType.Byte:
+                    return "char";
+                    
+                case TokenType.Short:
+                    return "short";
+                    
+                case TokenType.Int:
+                    return "int";
+                    
+                case TokenType.Long:
+                    return "long long";
+                    
+                case TokenType.Single:
+                    return "float";
+                    
+                case TokenType.Double:
+                    return "double";
+            }
+
+            return "void";
         }
 
         // Learn everything
@@ -281,15 +328,80 @@ namespace Suteki
         }
 
         // Generate function declaration
-        public void GenerateFunctionDeclaration(Token nameToken)
+        public void GenerateFunctionDeclaration(Token typeToken, Token nameToken)
+        {
+            // Parse the function header
+            string functionHeader = "";
+
+            functionHeader += getTypeAsCType(typeToken);
+            functionHeader += $" {(string)nameToken.Data}(";
+
+            Advance();
+            functionHeader += ")";
+
+            // Add to header file
+            CurrentInput.HeaderOutput += $"extern {functionHeader};\n";
+
+            // Add to source file
+            CurrentInput.SourceOutput += $"\n{functionHeader}\n";
+
+            // Parse function body
+            Advance();
+            CurrentInput.SourceOutput += "{\n";
+            ++TabCount;
+
+            while (!Match(TokenType.RightBrace))
+                GenerateStatement();
+
+            --TabCount;
+            CurrentInput.SourceOutput += "}";
+        }
+
+        // Generate variable declaration
+        public void GenerateVariableDeclaration(Token typeToken, Token nameToken, bool isGlobal)
         {
 
         }
 
-        // Generate variable declaration
-        public void GenerateVariableDeclaration(Token nameToken, bool isGlobal)
+        // Generate return statement
+        public void GenerateReturnStatement()
         {
+            CurrentInput.SourceOutput += "return";
 
+            // Parse value
+            if (Match(TokenType.Semicolon))
+                CurrentInput.SourceOutput += ";\n";
+            else
+                Consume(TokenType.Semicolon, "Expected ';' after return expression.");
+        }
+
+        // Generate statement
+        public void GenerateStatement()
+        {
+            Advance();
+
+            // Generate tabs
+            for (uint i = 0; i < TabCount; ++i)
+                CurrentInput.SourceOutput += '\t';
+
+            switch (PreviousToken.Type)
+            {
+                case TokenType.Return:
+                {
+                    GenerateReturnStatement();
+                    break;
+                }
+
+                default:
+                {
+                    // Remove tabs
+                    CurrentInput.SourceOutput = CurrentInput.SourceOutput.Substring(0, 
+                            (int)(CurrentInput.SourceOutput.Length - TabCount));
+
+                    Error(PreviousToken, "Unexpected token.");
+                    break;
+                }
+            }
         }
 
         // Start compiling 
@@ -338,6 +450,7 @@ namespace Suteki
                                 break;
                             }
 
+                            Token typeToken = PreviousToken;
                             Token nameToken;
 
                             // Parse declaration name
@@ -346,16 +459,16 @@ namespace Suteki
 
                             // Generate declaration
                             if (Match(TokenType.LeftParenthesis))
-                                GenerateFunctionDeclaration(nameToken);
+                                GenerateFunctionDeclaration(typeToken, nameToken);
                             else
-                                GenerateVariableDeclaration(nameToken, true);
+                                GenerateVariableDeclaration(typeToken, nameToken, true);
                             break;
                         }
                     }
                 }
             }
 
-            return true;
+            return !HadError;
         }
     }
 }

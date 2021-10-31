@@ -17,7 +17,18 @@ namespace Suteki
         Semicolon,
         Dot,
 
+        Void,
+        Bool,
+        UByte,
+        UShort,
+        UInt,
+        ULong,
+        Byte,
+        Short,
         Int,
+        Long,
+        Single,
+        Double,
 
         Export,
         Import,

@@ -2,9 +2,9 @@
 suteki (素敵) a is simple programming language like C.
 
 # TODO
-- [ ] Function declaration.
+- [x] Function declaration.
 - [ ] Basic expression parsing.
-- [ ] Return statement.
+- [x] Return statement.
 - [ ] Importing modules.
 - [ ] Variable declaration.
 - [ ] Function parameters.

@@ -27,7 +27,7 @@ namespace Suteki
                 newHeaderOutput += "\n#endif";
 
                 // Add includes
-                string newSourceOutput = $"#include \"{fileName}.h\"";
+                string newSourceOutput = $"#include \"{fileName}.h\"\n";
                 newSourceOutput += input.SourceOutput;
 
                 // Write files

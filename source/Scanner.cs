@@ -23,8 +23,18 @@ namespace Suteki
             Column   = 1;
             Keywords = new Dictionary<string, TokenType>();
 
-            // TODO: add the other types
-            Keywords.Add("int", TokenType.Int);
+            Keywords.Add("void",   TokenType.Void);
+            Keywords.Add("bool",   TokenType.Bool);
+            Keywords.Add("ubyte",  TokenType.UByte);
+            Keywords.Add("ushort", TokenType.UShort);
+            Keywords.Add("uint",   TokenType.UInt);
+            Keywords.Add("ulong",  TokenType.ULong);
+            Keywords.Add("byte",   TokenType.Byte);
+            Keywords.Add("short",  TokenType.Short);
+            Keywords.Add("int",    TokenType.Int);
+            Keywords.Add("long",   TokenType.Long);
+            Keywords.Add("single", TokenType.Single);
+            Keywords.Add("double", TokenType.Double);
 
             Keywords.Add("export", TokenType.Export);
             Keywords.Add("import", TokenType.Import);
