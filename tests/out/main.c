@@ -2,6 +2,5 @@
 
 int main()
 {
-	return;
-	return;
+	return 123.32;
 }

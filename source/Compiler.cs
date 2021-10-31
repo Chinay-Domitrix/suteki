@@ -363,6 +363,15 @@ namespace Suteki
 
         }
 
+        // Generate expression
+        public void GenerateExpression()
+        {
+            if (Match(TokenType.Number))
+                CurrentInput.SourceOutput += PreviousToken.Data.ToString();
+            else
+                Error(CurrentToken, "Unexpected token.");
+        }
+
         // Generate return statement
         public void GenerateReturnStatement()
         {
@@ -372,7 +381,13 @@ namespace Suteki
             if (Match(TokenType.Semicolon))
                 CurrentInput.SourceOutput += ";\n";
             else
+            {
+                CurrentInput.SourceOutput += ' ';
+                GenerateExpression();
+                CurrentInput.SourceOutput += ";\n";
+
                 Consume(TokenType.Semicolon, "Expected ';' after return expression.");
+            }
         }
 
         // Generate statement
