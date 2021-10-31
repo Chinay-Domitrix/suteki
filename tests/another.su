@@ -1,6 +1,0 @@
-export tests.another;
-
-void exit()
-{
-    
-}

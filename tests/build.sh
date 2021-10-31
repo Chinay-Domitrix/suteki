@@ -1,1 +1,1 @@
-dotnet run ../tests/main.su ../tests/another.su --output ../tests/out/
+dotnet run ../tests/*.su --output ../tests/out/

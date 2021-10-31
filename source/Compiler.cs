@@ -70,6 +70,30 @@ namespace Suteki
             Console.WriteLine();
         }
 
+        // Show warning
+        public void Warning(string message)
+        {
+            Utilities.WriteColor(ConsoleColor.Yellow, "Warning: ");
+            Utilities.WriteColor(ConsoleColor.White,  message);
+            Console.WriteLine();
+        }
+
+        // Show warning at Token
+        public void Warning(Token token, string message)
+        {
+            Utilities.WriteColor(ConsoleColor.Yellow, $"[{CurrentInput.Path}:{token.Line}:{token.Column}] Warning");
+
+            if (token.Type == TokenType.End)
+                Utilities.WriteColor(ConsoleColor.Yellow, " at end: ");
+            else if (token.Type == TokenType.Error)
+                Utilities.WriteColor(ConsoleColor.Yellow, ": ");
+            else
+                Utilities.WriteColor(ConsoleColor.Yellow, " at ", ConsoleColor.White, token.Data, ConsoleColor.Red, ": ");
+
+            Utilities.WriteColor(ConsoleColor.White, message);
+            Console.WriteLine();
+        }
+
         // Advance the Token
         public void Advance()
         {
@@ -213,7 +237,10 @@ namespace Suteki
                             CurrentInput.ModuleName = moduleName;
 
                             if (!Modules.ContainsKey(moduleName))
-                                Modules[moduleName] = new Module();
+                            {
+                                Modules[moduleName]           = new Module();
+                                Modules[moduleName].FileInput = index;
+                            }
                             else
                             {
                                 startName.Data = moduleName;
@@ -334,7 +361,7 @@ namespace Suteki
             string functionHeader = "";
 
             functionHeader += getTypeAsCType(typeToken);
-            functionHeader += $" {(string)nameToken.Data}(";
+            functionHeader += $" su_{(string)nameToken.Data}(";
 
             Advance();
             functionHeader += ")";
@@ -343,7 +370,7 @@ namespace Suteki
             CurrentInput.HeaderOutput += $"extern {functionHeader};\n";
 
             // Add to source file
-            CurrentInput.SourceOutput += $"\n{functionHeader}\n";
+            CurrentInput.SourceOutput += $"{functionHeader}\n";
 
             // Parse function body
             Advance();
@@ -354,7 +381,7 @@ namespace Suteki
                 GenerateStatement();
 
             --TabCount;
-            CurrentInput.SourceOutput += "}";
+            CurrentInput.SourceOutput += "}\n\n";
         }
 
         // Generate variable declaration
@@ -453,6 +480,52 @@ namespace Suteki
                             }
 
                             Advance();
+                            break;
+                        }
+
+                        // Import module
+                        case TokenType.Import:
+                        {
+                            // Parse the module name
+                            Token  startName  = CurrentToken;
+                            string moduleName = "";
+
+                            for (;;)
+                            {
+                                if (Match(TokenType.Identifier))
+                                    moduleName += (string)PreviousToken.Data;
+                                else
+                                {
+                                    startName.Data = moduleName;
+                                    Error(startName, "Invalid module name.");
+                                }
+
+                                if (!Match(TokenType.Dot))
+                                    break;
+
+                                moduleName += '.';
+                            }
+
+                            Consume(TokenType.Semicolon, "Expected ';' after module name.");
+
+                            // Make sure that module exists
+                            if (!Modules.ContainsKey(moduleName))
+                            {
+                                startName.Data = moduleName;
+                                Error(startName, "Could not find module.");
+                                break;
+                            }
+
+                            // Make sure that module wasn't imported already
+                            if (CurrentInput.Imports.Contains(moduleName))
+                            {
+                                startName.Data = moduleName;
+                                Warning(startName, "This module was already imported.");
+                                break;
+                            }
+
+                            // Add import
+                            CurrentInput.Imports.Add(moduleName);
                             break;
                         }
 

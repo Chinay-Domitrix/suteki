@@ -1,0 +1,11 @@
+export std;
+
+void write()
+{
+
+}
+
+void exit()
+{
+
+}

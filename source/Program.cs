@@ -8,6 +8,7 @@ namespace Suteki
     {
         public static List<FileInput> Inputs     = new List<FileInput>();
         public static string          OutputPath = "";
+        public static string          Version    = "v0.1.0";
 
         // Parse arguments
         public static bool ParseArguments(string[] arguments)
