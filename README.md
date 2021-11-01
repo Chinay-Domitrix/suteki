@@ -13,4 +13,4 @@ suteki (素敵) a is simple programming language like C.
 - [ ] Function calls.
 - [ ] Type checking.
 - [ ] Macros.
-- [ ] Single line comments
+- [x] Single line comments.

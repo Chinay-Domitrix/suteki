@@ -77,6 +77,19 @@ namespace Suteki
                         break;
                     }
 
+                    case '/':
+                    {
+                        if (Current + 1 < Source.Length && Source[Current + 1] == '/')
+                        {
+                            Current += 2;
+
+                            while (Current <= Source.Length && Source[Current] != '\n')
+                                ++Current;
+                        }
+
+                        break;
+                    }
+
                     default:
                         return;
                 }

@@ -1,14 +1,17 @@
 export std;
 
+// Console streams
 int stdin  = 0;
 int stdout = 1;
 int stderr = 2;
 
+// Write something to the console
 void write(int fd, byte ptr, long size)
 {
 
 }
 
+// Exit from the program
 void exit(int status)
 {
 

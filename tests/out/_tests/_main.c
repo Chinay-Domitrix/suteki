@@ -4,19 +4,5 @@
 
 int g_su_main()
 {
-	int su_something = 0;
-	su_something = 13;
-	return 123;
-}
-
-void g_su_log()
-{
-}
-
-void g_su_log_be(char c)
-{
-}
-
-void g_su_log_it(int i)
-{
+	return 0;
 }
