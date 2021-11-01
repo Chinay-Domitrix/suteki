@@ -4,7 +4,8 @@
 
 #include <global.h>
 
-extern int g_su_main_();
+extern int g_su_main();
+extern void g_su_log();
 extern void g_su_log_be(char c);
 extern void g_su_log_it(int i);
 

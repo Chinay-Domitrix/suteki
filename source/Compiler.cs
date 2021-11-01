@@ -336,6 +336,8 @@ namespace Suteki
                                     
                                     Consume(TokenType.RightParenthesis, "Expected ')' after function parameters.");
                                 }
+                                else
+                                    nameString = nameString.Substring(0, nameString.Length - 1);
                             }
                             else
                                 symbol.Type = SymbolType.Variable;
@@ -434,6 +436,8 @@ namespace Suteki
                 Advance();
                 functionParameters = functionParameters.Substring(0, functionParameters.Length - 2);
             }
+            else
+                functionHeader = functionHeader.Substring(0, functionHeader.Length - 1);
 
             functionParameters += ')';
             functionHeader     += functionParameters;

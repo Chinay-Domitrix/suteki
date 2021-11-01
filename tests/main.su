@@ -5,6 +5,11 @@ int main()
     return 123;
 }
 
+void log()
+{
+    
+}
+
 void log(byte c)
 {
 
@@ -12,5 +17,5 @@ void log(byte c)
 
 void log(int i)
 {
-    
+
 }

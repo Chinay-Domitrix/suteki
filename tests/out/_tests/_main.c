@@ -2,9 +2,13 @@
 #include <_tests/_main.h>
 #include <_tests/_std.h>
 
-int g_su_main_()
+int g_su_main()
 {
 	return 123;
+}
+
+void g_su_log()
+{
 }
 
 void g_su_log_be(char c)
