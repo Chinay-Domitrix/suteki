@@ -10,5 +10,16 @@ namespace Suteki
     {
         public SymbolType Type;
         public string     Name;
+
+        // Initialize the Symbol
+        public Symbol()
+        {
+        }
+
+        public Symbol(SymbolType type, string name)
+        {
+            Type = type;
+            Name = name;
+        }
     }
 }

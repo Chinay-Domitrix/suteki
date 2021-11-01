@@ -6,9 +6,11 @@ suteki (素敵) a is simple programming language like C.
 - [ ] Basic expression parsing.
 - [x] Return statement.
 - [x] Importing modules.
-- [ ] Variable declaration.
+- [x] Variable declaration.
+- [x] Variable assignment.
 - [x] Function parameters.
 - [x] Function overloading.
 - [ ] Function calls.
 - [ ] Type checking.
 - [ ] Macros.
+- [ ] Single line comments

@@ -71,10 +71,12 @@ namespace Suteki
             Compiler compiler = new Compiler();
             
             if (compiler.Start())
+            {
                 Utilities.WriteColor(ConsoleColor.Green, "Everything was successfully compiled.\n");
 
-            // Link
-            Linker.Start(compiler);
+                // Link
+                Linker.Start(compiler);
+            }
         }
     }
 }

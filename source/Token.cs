@@ -16,6 +16,7 @@ namespace Suteki
         Comma,
         Semicolon,
         Dot,
+        Equal,
 
         Void,
         Bool,

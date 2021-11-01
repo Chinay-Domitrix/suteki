@@ -7,6 +7,7 @@ namespace Suteki
     {
         public Dictionary<string, Module>     Modules;
         public Dictionary<string, Symbol>     Symbols;
+        public Dictionary<string, Symbol>     Locals;
         public int                            MainFile;
         public Scanner                        CurrentScanner;
         public bool                           HadError;
@@ -19,6 +20,7 @@ namespace Suteki
         {
             Modules   = new Dictionary<string, Module>();
             Symbols   = new Dictionary<string, Symbol>();
+            Locals    = new Dictionary<string, Symbol>();
             UserTypes = new Dictionary<string, UserType>();
             MainFile  = -1;
             HadError  = false;
@@ -340,7 +342,10 @@ namespace Suteki
                                     nameString = nameString.Substring(0, nameString.Length - 1);
                             }
                             else
+                            {
                                 symbol.Type = SymbolType.Variable;
+                                nameString  = nameString.Substring(0, nameString.Length - 1);
+                            }
 
                             symbol.Name = nameString;
 
@@ -463,7 +468,77 @@ namespace Suteki
         // Generate variable declaration
         public void GenerateVariableDeclaration(Token typeToken, Token nameToken, bool isGlobal)
         {
+            string nameString = (string)nameToken.Data;
 
+            if (isGlobal)
+            {
+                CurrentInput.HeaderOutput +=  "extern ";
+                CurrentInput.HeaderOutput +=  getTypeAsCType(typeToken);
+                CurrentInput.HeaderOutput += $" g_su_{(string)nameToken.Data};\n";
+            }
+            else
+            {
+                if (Symbols.ContainsKey(nameString) || Locals.ContainsKey(nameString))
+                    Error(nameToken, "This symbol was already declared.");
+
+                Locals[nameString] = new Symbol(SymbolType.Variable, nameString);
+            }
+
+            CurrentInput.SourceOutput += getTypeAsCType(typeToken);
+
+            if (isGlobal)
+                CurrentInput.SourceOutput += " g_";
+            else
+                CurrentInput.SourceOutput += ' ';
+
+            CurrentInput.SourceOutput += $"su_{(string)nameToken.Data}";
+
+            if (!Match(TokenType.Semicolon))
+            {
+                if (Match(TokenType.Equal))
+                {
+                    CurrentInput.SourceOutput += " = ";
+                    GenerateExpression();
+                }
+                else
+                    Error(CurrentToken, "Expected '=' or ';' after variable name.");
+
+                Consume(TokenType.Semicolon, "Expected ';' after variable declaration.");
+            }
+
+            CurrentInput.SourceOutput += ";\n";
+        }
+
+        // Generate variable assignment
+        public void GenerateVariableAssignment(Token nameToken)
+        {
+            string nameString = (string)nameToken.Data;
+
+            if (Symbols.ContainsKey(nameString))
+            {
+                CurrentInput.SourceOutput += "g_";
+
+                Symbol symbol = Symbols[nameString];
+
+                if (symbol.Type != SymbolType.Variable)
+                    Error(nameToken, "This variable does not exists.");
+            }
+            else if (Locals.ContainsKey(nameString))
+            {
+                Symbol symbol = Locals[nameString];
+
+                if (symbol.Type != SymbolType.Variable)
+                    Error(nameToken, "This variable does not exists.");
+            }
+            else
+                Error(nameToken, "This variable does not exists.");
+
+            CurrentInput.SourceOutput += $"su_{nameString}";
+            CurrentInput.SourceOutput +=  " = ";
+            GenerateExpression();
+            
+            Consume(TokenType.Semicolon, "Expected ';' after variable assignment.");
+            CurrentInput.SourceOutput += ";\n";
         }
 
         // Generate expression
@@ -512,11 +587,32 @@ namespace Suteki
 
                 default:
                 {
-                    // Remove tabs
-                    CurrentInput.SourceOutput = CurrentInput.SourceOutput.Substring(0, 
-                            (int)(CurrentInput.SourceOutput.Length - TabCount));
+                    if (!IsType(PreviousToken))
+                    {
+                        Token previousToken = PreviousToken;
 
-                    Error(PreviousToken, "Unexpected token.");
+                        if (Match(TokenType.Equal))
+                            GenerateVariableAssignment(previousToken);
+                        else
+                        {
+                            // Remove tabs
+                            CurrentInput.SourceOutput = CurrentInput.SourceOutput.Substring(0, 
+                                    (int)(CurrentInput.SourceOutput.Length - TabCount));
+
+                            Error(PreviousToken, "Unexpected token.");
+                        }
+                        break;
+                    }
+
+                    Token typeToken = PreviousToken;
+                    Token nameToken;
+
+                    // Parse declaration name
+                    Consume(TokenType.Identifier, "Expected identifier after type.");
+                    nameToken  = PreviousToken;
+
+                    // Generate declaration
+                    GenerateVariableDeclaration(typeToken, nameToken, false);
                     break;
                 }
             }
@@ -602,6 +698,11 @@ namespace Suteki
 
                             // Add import
                             CurrentInput.Imports.Add(moduleName);
+
+                            // Add module symbols to global symbols
+                            foreach (KeyValuePair<string, Symbol> entry in Modules[moduleName].Symbols)
+                                Symbols[entry.Key] = entry.Value;
+
                             break;
                         }
 
@@ -626,6 +727,7 @@ namespace Suteki
                                 GenerateFunctionDeclaration(typeToken, nameToken);
                             else
                                 GenerateVariableDeclaration(typeToken, nameToken, true);
+
                             break;
                         }
                     }

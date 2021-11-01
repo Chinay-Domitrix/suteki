@@ -195,6 +195,9 @@ namespace Suteki
                 case '.':
                     return MakeToken(TokenType.Dot);
 
+                case '=':
+                    return MakeToken(TokenType.Equal);
+
                 case '"':
                     return MakeStringToken();
             }

@@ -2,6 +2,8 @@ import std;
 
 int main()
 {
+    int something = 0;
+    something = 13;
     return 123;
 }
 

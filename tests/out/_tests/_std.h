@@ -4,6 +4,9 @@
 
 #include <global.h>
 
+extern int g_su_stdin;
+extern int g_su_stdout;
+extern int g_su_stderr;
 extern void g_su_write_itbelg(int fd, char ptr, long long size);
 extern void g_su_exit_it(int status);
 

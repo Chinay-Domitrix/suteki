@@ -4,6 +4,8 @@
 
 int g_su_main()
 {
+	int su_something = 0;
+	su_something = 13;
 	return 123;
 }
 

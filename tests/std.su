@@ -1,5 +1,9 @@
 export std;
 
+int stdin  = 0;
+int stdout = 1;
+int stderr = 2;
+
 void write(int fd, byte ptr, long size)
 {
 
