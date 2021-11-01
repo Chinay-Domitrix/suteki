@@ -184,6 +184,51 @@ namespace Suteki
             return "void";
         }
 
+        // Get type name
+        public string getTypeName(Token typeToken)
+        {
+            switch (typeToken.Type)
+            {
+                case TokenType.Void:
+                    return "vd";
+
+                case TokenType.Bool:
+                    return "bl";
+                    
+                case TokenType.UByte:
+                    return "ube";
+                    
+                case TokenType.UShort:
+                    return "ust";
+                    
+                case TokenType.UInt:
+                    return "uit";
+                    
+                case TokenType.ULong:
+                    return "ulg";
+                    
+                case TokenType.Byte:
+                    return "be";
+                    
+                case TokenType.Short:
+                    return "st";
+                    
+                case TokenType.Int:
+                    return "it";
+                    
+                case TokenType.Long:
+                    return "lg";
+                    
+                case TokenType.Single:
+                    return "se";
+                    
+                case TokenType.Double:
+                    return "de";
+            }
+
+            return "vd";
+        }
+
         // Learn everything
         public bool Learn()
         {
@@ -263,28 +308,46 @@ namespace Suteki
                             Consume(TokenType.Identifier, "Expected identifier after type.");
 
                             nameToken  = PreviousToken;
-                            nameString = (string)PreviousToken.Data;
+                            nameString = (string)PreviousToken.Data + '_';
 
                             // Make symbol
                             Symbol symbol = new Symbol();
-                            symbol.Name   = nameString;
 
                             if (Match(TokenType.LeftParenthesis))
+                            {
                                 symbol.Type = SymbolType.Function;
+
+                                if (!Match(TokenType.RightParenthesis))
+                                {
+                                    do
+                                    {
+                                        Advance();
+
+                                        if (!IsType(PreviousToken))
+                                        {
+                                            Error(PreviousToken, "Expected type.");
+                                            break;
+                                        }
+
+                                        nameString += getTypeName(PreviousToken);
+                                        Consume(TokenType.Identifier, "Expected parameter name after type.");
+                                    }
+                                    while (Match(TokenType.Comma));
+                                    
+                                    Consume(TokenType.RightParenthesis, "Expected ')' after function parameters.");
+                                }
+                            }
                             else
                                 symbol.Type = SymbolType.Variable;
 
-                            // Make sure that symbol was not declared before
-                            if (CurrentInput.ModuleName != "")
-                                symbolTable = Modules[CurrentInput.ModuleName].Symbols;
-                            else
-                                symbolTable = Symbols;
+                            symbol.Name = nameString;
 
-                            if (symbolTable.ContainsKey(nameString))
+                            // Make sure that symbol was not declared before
+                            if (symbols.ContainsKey(nameString))
                                 Error(nameToken, "This symbol was already declared.");
                             
                             // Is entry point function declaration?
-                            if (nameString == "main" && symbol.Type == SymbolType.Function)
+                            if ((string)nameToken.Data == "main" && symbol.Type == SymbolType.Function)
                             {
                                 if (MainFile != -1)
                                     Error(nameToken, "The main function was already declared.");
@@ -309,15 +372,6 @@ namespace Suteki
                             }
                             else
                             {
-                                if (!Match(TokenType.RightParenthesis))
-                                {
-                                    while (!Match(TokenType.RightParenthesis) && !Match(TokenType.End))
-                                        Advance();
-                                    
-                                    if (PreviousToken.Type == TokenType.End)
-                                        Error(PreviousToken, "Expected ')' after function parameters.");
-                                }
-
                                 Consume(TokenType.LeftBrace, "Expected '{' after ')'.");
 
                                 if (!Match(TokenType.RightBrace))
@@ -358,13 +412,31 @@ namespace Suteki
         public void GenerateFunctionDeclaration(Token typeToken, Token nameToken)
         {
             // Parse the function header
-            string functionHeader = "";
+            string functionHeader     = "";
+            string functionParameters = "(";
 
             functionHeader += getTypeAsCType(typeToken);
-            functionHeader += $" g_su_{(string)nameToken.Data}(";
+            functionHeader += $" g_su_{(string)nameToken.Data}_";
 
-            Advance();
-            functionHeader += ")";
+            if (!Match(TokenType.RightParenthesis))
+            {
+                do
+                {
+                    Advance();
+                    functionHeader     += getTypeName(PreviousToken);
+                    functionParameters += getTypeAsCType(PreviousToken) + ' ';
+
+                    Advance();
+                    functionParameters += (string)PreviousToken.Data + ", ";
+                }
+                while (Match(TokenType.Comma));
+                
+                Advance();
+                functionParameters = functionParameters.Substring(0, functionParameters.Length - 2);
+            }
+
+            functionParameters += ')';
+            functionHeader     += functionParameters;
 
             // Add to header file
             CurrentInput.HeaderOutput += $"extern {functionHeader};\n";

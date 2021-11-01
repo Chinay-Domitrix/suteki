@@ -1,11 +1,11 @@
 export std;
 
-void write()
+void write(int fd, byte ptr, long size)
 {
 
 }
 
-void exit()
+void exit(int status)
 {
 
 }

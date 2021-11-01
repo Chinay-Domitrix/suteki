@@ -4,7 +4,7 @@
 
 #include <global.h>
 
-extern void g_su_write();
-extern void g_su_exit();
+extern void g_su_write_itbelg(int fd, char ptr, long long size);
+extern void g_su_exit_it(int status);
 
 #endif

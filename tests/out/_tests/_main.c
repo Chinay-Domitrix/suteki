@@ -2,7 +2,15 @@
 #include <_tests/_main.h>
 #include <_tests/_std.h>
 
-int g_su_main()
+int g_su_main_()
 {
 	return 123;
+}
+
+void g_su_log_be(char c)
+{
+}
+
+void g_su_log_it(int i)
+{
 }

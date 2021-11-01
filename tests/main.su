@@ -4,3 +4,13 @@ int main()
 {
     return 123;
 }
+
+void log(byte c)
+{
+
+}
+
+void log(int i)
+{
+    
+}
